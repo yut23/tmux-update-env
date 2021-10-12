@@ -5,7 +5,8 @@ if [[ -n $TMUX ]]; then
 
   _tmux_update_env_last_change=$(date +%s)
   function _update_tmux_env() {
-    if (( $(<"$_tmux_update_env_path") > $_tmux_update_env_last_change )); then
+    if [[ -e "$_tmux_update_env_path" ]] && \
+       (( $(<"$_tmux_update_env_path") > $_tmux_update_env_last_change )); then
       eval "$(tmux show-environment -s)"
       _tmux_update_env_last_change=$(<"$_tmux_update_env_path")
     fi
