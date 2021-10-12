@@ -7,7 +7,8 @@ if [[ -n $TMUX ]]; then
   function _update_tmux_env() {
     if [[ -e "$_tmux_update_env_path" ]] && \
        (( $(<"$_tmux_update_env_path") > $_tmux_update_env_last_change )); then
-      eval "$(tmux show-environment -s)"
+      # don't clear DISPLAY or XAUTHORITY
+      eval "$(tmux show-environment -s | grep -vE '^unset (DISPLAY|XAUTHORITY);$')"
       _tmux_update_env_last_change=$(<"$_tmux_update_env_path")
     fi
   }
