@@ -7,8 +7,16 @@ if [[ -n $TMUX ]]; then
   function _update_tmux_env() {
     if [[ -e "$_tmux_update_env_path" ]] && \
        (( $(<"$_tmux_update_env_path") > $_tmux_update_env_last_change )); then
-      # don't clear DISPLAY or XAUTHORITY
-      eval "$(tmux show-environment -s | grep -vE '^unset (DISPLAY|XAUTHORITY);$')"
+      lines=("${(@f)$(tmux show-environment -s)}")
+      # if DISPLAY is unset in the current session (i.e. no X forwarding),
+      # don't change DISPLAY or XAUTHORITY, so programs will run on the remote
+      # display instead (only on mandelbrot)
+      if (( ${lines[(I)unset DISPLAY;]} )) && [[ $system_name == mandelbrot ]]; then
+        # remove the matching elements
+        lines=("${(@)lines:#unset (DISPLAY|XAUTHORITY);}")
+      fi
+      # this expands to a single string, joining the array elements
+      eval "${lines}"
       _tmux_update_env_last_change=$(<"$_tmux_update_env_path")
     fi
   }
